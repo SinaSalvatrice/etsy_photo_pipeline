@@ -1,0 +1,26 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run pendant demo",
+      "type": "shell",
+      "command": "python make_etsy_set.py --input demo/pendant_demo --preset jewelry_dark_pendant --no-rembg --debug",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run clock demo",
+      "type": "shell",
+      "command": "python make_etsy_set.py --input demo/clock_demo --preset clock_wall_dark --no-rembg --debug",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Windows GUI",
+      "type": "shell",
+      "command": "python apps/windows/app_pyside.py",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

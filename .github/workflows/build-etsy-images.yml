@@ -1,0 +1,28 @@
+name: Build Etsy Demo Images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Create demo data
+        run: python -m src.demo_data
+      - name: Run pendant demo
+        run: python make_etsy_set.py --input demo/pendant_demo --preset jewelry_dark_pendant --no-rembg --debug
+      - name: Run clock demo
+        run: python make_etsy_set.py --input demo/clock_demo --preset clock_wall_dark --no-rembg --debug
+      - name: Upload output artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: etsy-output
+          path: output/

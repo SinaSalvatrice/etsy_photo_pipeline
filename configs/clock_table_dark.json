@@ -1,0 +1,23 @@
+{
+  "canvas_size": 3000,
+  "output_quality": 95,
+  "background_template": "templates/clocks/table_clock_dark_surface_01.jpg",
+  "mockup_templates": [
+    "templates/clocks/table_clock_dark_surface_01.json"
+  ],
+  "object_scale": 0.7,
+  "position_x": 0.5,
+  "position_y": 0.58,
+  "rotation_degrees": 0,
+  "auto_rotate": false,
+  "shadow_opacity": 0.5,
+  "shadow_blur": 55,
+  "shadow_offset_x": 35,
+  "shadow_offset_y": 75,
+  "contrast": 1.08,
+  "brightness": 1.0,
+  "sharpness": 1.1,
+  "saturation": 0.98,
+  "preserve_object": true,
+  "export_zip": true
+}

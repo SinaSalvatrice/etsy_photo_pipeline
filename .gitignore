@@ -1,0 +1,21 @@
+# Working product photos and generated exports stay local by default
+input/*
+output/*
+!input/.gitkeep
+!output/.gitkeep
+
+# Build output
+dist/*
+build/*
+*.spec.bak
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# OS/editor
+.DS_Store
+Thumbs.db

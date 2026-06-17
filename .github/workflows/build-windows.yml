@@ -1,0 +1,26 @@
+name: Build Windows App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_windows.txt
+          pip install pyinstaller
+      - name: Build app
+        run: |
+          pyinstaller --noconfirm --name "Etsy Photo Pipeline" --windowed --add-data "configs;configs" --add-data "templates;templates" apps/windows/app_pyside.py
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Etsy-Photo-Pipeline-Windows
+          path: dist/
