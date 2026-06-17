@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 from PIL import Image, ImageDraw, ImageOps
 
+from .app_config import resolve_resource_path
 from .composite import resize_product
 from .shadows import make_shadow
 from .utils import fallback_background
@@ -16,13 +17,23 @@ def load_template_metadata(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _resolve_template_asset(meta_path: Path, raw_path: str | Path | None) -> Path | None:
+    if not raw_path:
+        return None
+
+    candidate = Path(raw_path)
+    if candidate.is_absolute():
+        return candidate
+
+    meta_relative = (meta_path.parent / candidate).resolve()
+    if meta_relative.exists():
+        return meta_relative
+
+    return resolve_resource_path(candidate)
+
+
 def _load_template_image(meta: dict[str, Any], meta_path: Path, canvas_size: int) -> tuple[Image.Image, float, float, tuple[int, int]]:
-    raw = Path(meta.get("template_image", ""))
-    if not raw.is_absolute():
-        # First try relative to repo root, then relative to metadata file.
-        img_path = raw if raw.exists() else (meta_path.parent / raw.name)
-    else:
-        img_path = raw
+    img_path = _resolve_template_asset(meta_path, meta.get("template_image"))
     if not img_path.exists():
         print(f"WARNING: Template image not found: {img_path}. Using fallback background.")
         return fallback_background(canvas_size, dark=True), 1.0, 1.0, (0, 0)
@@ -81,7 +92,7 @@ def render_mockup(template_json: Path, product: Image.Image, base_config: dict[s
 
     overlay_path = meta.get("overlay_image")
     if overlay_path:
-        overlay = Path(overlay_path)
+        overlay = _resolve_template_asset(template_json, overlay_path)
         if overlay.exists():
             over = ImageOps.fit(Image.open(overlay).convert("RGBA"), (canvas_size, canvas_size), method=Image.Resampling.LANCZOS)
             canvas.alpha_composite(over, (0, 0))

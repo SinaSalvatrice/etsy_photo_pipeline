@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 from argparse import Namespace
-from pathlib import Path
 from typing import Any
+
+from .app_config import CONFIG_DIR, resolve_user_path
 
 
 def load_config(preset_name: str) -> dict[str, Any]:
-    path = Path("configs") / f"{preset_name}.json"
+    path = CONFIG_DIR / f"{preset_name}.json"
     if not path.exists():
         raise FileNotFoundError(f"Preset not found: {path}")
     return json.loads(path.read_text(encoding="utf-8"))
@@ -16,9 +17,9 @@ def load_config(preset_name: str) -> dict[str, Any]:
 def apply_cli_overrides(config: dict[str, Any], args: Namespace) -> dict[str, Any]:
     cfg = dict(config)
     if args.background:
-        cfg["background_template"] = args.background
+        cfg["background_template"] = str(resolve_user_path(args.background))
     if args.template:
-        cfg["mockup_templates"] = args.template
+        cfg["mockup_templates"] = [str(resolve_user_path(args.template))]
     if args.scale is not None:
         cfg["object_scale"] = args.scale
     if args.rotation is not None:

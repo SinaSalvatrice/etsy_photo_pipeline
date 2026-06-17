@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import os
 import sys
 import traceback
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QThread, Signal
+from PySide6.QtCore import QObject, QThread, Signal, QUrl
+from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -27,7 +27,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.app_config import list_presets
+from src.app_config import OUTPUT_DIR, PROJECT_ROOT as APP_PROJECT_ROOT, list_presets
 from src.pipeline import run_pipeline
 
 
@@ -59,9 +59,12 @@ class MainWindow(QMainWindow):
         self.last_output: Path | None = None
 
         self.input_edit = QLineEdit()
-        self.output_edit = QLineEdit(str(PROJECT_ROOT / "output"))
+        self.input_edit.setPlaceholderText(str(APP_PROJECT_ROOT / "input" / "your_product"))
+        self.output_edit = QLineEdit(str(OUTPUT_DIR))
         self.background_edit = QLineEdit()
         self.template_edit = QLineEdit()
+        self.background_edit.setPlaceholderText("Optional JPG/PNG background override")
+        self.template_edit.setPlaceholderText("Optional template JSON override")
         self.preset_combo = QComboBox()
         self.preset_combo.addItems(list_presets())
         self.canvas_combo = QComboBox()
@@ -107,6 +110,17 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
+    def append_status(self, message: str) -> None:
+        self.log_box.appendPlainText(message)
+
+    def current_folder_hint(self, edit: QLineEdit) -> str:
+        value = edit.text().strip()
+        if value:
+            path = Path(value)
+            if path.exists():
+                return str(path)
+        return str(APP_PROJECT_ROOT)
+
     def _folder_row(self, edit: QLineEdit) -> QWidget:
         button = QPushButton("Browse")
         button.clicked.connect(lambda: self.pick_folder(edit))
@@ -141,7 +155,7 @@ class MainWindow(QMainWindow):
         return row
 
     def pick_folder(self, edit: QLineEdit) -> None:
-        folder = QFileDialog.getExistingDirectory(self, "Select folder", str(PROJECT_ROOT))
+        folder = QFileDialog.getExistingDirectory(self, "Select folder", self.current_folder_hint(edit))
         if folder:
             edit.setText(folder)
 
@@ -149,11 +163,20 @@ class MainWindow(QMainWindow):
         file_name, _ = QFileDialog.getOpenFileName(
             self,
             "Select file",
-            str(PROJECT_ROOT),
+            self.current_folder_hint(edit),
             "Images and JSON (*.png *.jpg *.jpeg *.webp *.json);;All files (*.*)",
         )
         if file_name:
             edit.setText(file_name)
+
+    def validate_optional_path(self, raw_path: str, field_name: str) -> Path | None:
+        value = raw_path.strip()
+        if not value:
+            return None
+        path = Path(value)
+        if not path.exists():
+            raise FileNotFoundError(f"{field_name} not found: {path}")
+        return path
 
     def start_pipeline(self) -> None:
         input_dir = Path(self.input_edit.text().strip())
@@ -165,12 +188,20 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Missing preset", "No preset was found in configs/.")
             return
 
+        try:
+            background_override = self.validate_optional_path(self.background_edit.text(), "Background override")
+            template_override = self.validate_optional_path(self.template_edit.text(), "Template override")
+        except FileNotFoundError as exc:
+            QMessageBox.warning(self, "Missing file", str(exc))
+            self.append_status(str(exc))
+            return
+
         params = {
             "input_dir": input_dir,
             "preset_name": preset,
             "output_dir": Path(self.output_edit.text().strip()) if self.output_edit.text().strip() else None,
-            "background_override": Path(self.background_edit.text().strip()) if self.background_edit.text().strip() else None,
-            "template_override": Path(self.template_edit.text().strip()) if self.template_edit.text().strip() else None,
+            "background_override": background_override,
+            "template_override": template_override,
             "canvas_size": int(self.canvas_combo.currentText()),
             "use_rembg": self.use_rembg.isChecked(),
             "debug": self.debug.isChecked(),
@@ -178,9 +209,13 @@ class MainWindow(QMainWindow):
             "export_zip": self.zip_export.isChecked(),
         }
 
+        self.last_output = None
         self.run_button.setEnabled(False)
         self.open_button.setEnabled(False)
-        self.log_box.appendPlainText("Starting...\n")
+        self.append_status("Starting pipeline...")
+        self.append_status(f"Input: {input_dir}")
+        self.append_status(f"Preset: {preset}")
+        self.append_status(f"Output base: {params['output_dir'] or OUTPUT_DIR}")
 
         self.thread = QThread()
         self.worker = PipelineWorker(params)
@@ -197,18 +232,20 @@ class MainWindow(QMainWindow):
 
     def on_finished(self, output: str) -> None:
         self.last_output = Path(output)
-        self.log_box.appendPlainText(f"Done: {output}\n")
+        self.append_status(f"Success: {output}")
         self.run_button.setEnabled(True)
         self.open_button.setEnabled(True)
+        QMessageBox.information(self, "Pipeline complete", f"Output folder created:\n{output}")
 
     def on_failed(self, error: str) -> None:
-        self.log_box.appendPlainText(error)
+        self.append_status(error)
         QMessageBox.critical(self, "Pipeline failed", error[-2000:])
         self.run_button.setEnabled(True)
+        self.open_button.setEnabled(False)
 
     def open_output_folder(self) -> None:
         if self.last_output and self.last_output.exists():
-            os.startfile(self.last_output)  # Windows only
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(self.last_output)))
 
 
 def main() -> None:

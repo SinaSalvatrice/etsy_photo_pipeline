@@ -14,8 +14,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", default="output", help="Base output folder")
     parser.add_argument("--background", default=None, help="Override background image path")
     parser.add_argument("--template", default=None, help="Override mockup template metadata JSON path")
-    parser.add_argument("--scale", type=float, default=None, help="Override object scale")
-    parser.add_argument("--rotation", type=float, default=None, help="Override rotation in degrees")
     parser.add_argument("--canvas-size", type=int, default=None, help="Override square canvas size, e.g. 2500")
     parser.add_argument("--zip", dest="force_zip", action="store_true", help="Force ZIP export")
     parser.add_argument("--no-zip", action="store_true", help="Disable ZIP export")
@@ -40,8 +38,6 @@ def main() -> None:
         background_override=Path(args.background) if args.background else None,
         template_override=Path(args.template) if args.template else None,
         canvas_size=args.canvas_size,
-        object_scale=args.scale,
-        rotation_degrees=args.rotation,
         use_rembg=not args.no_rembg,
         debug=args.debug,
         overwrite=args.overwrite,

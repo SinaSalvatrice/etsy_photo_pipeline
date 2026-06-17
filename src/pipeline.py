@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
+from .app_config import OUTPUT_DIR, resolve_resource_path, resolve_user_path
 from .config import load_config
 from .export_set import run_pipeline as run_export_pipeline
 
@@ -14,29 +15,33 @@ def run_pipeline(
     background_override: Optional[Path] = None,
     template_override: Optional[Path] = None,
     canvas_size: Optional[int] = None,
-    object_scale: Optional[float] = None,
-    rotation_degrees: Optional[float] = None,
     use_rembg: bool = True,
     debug: bool = False,
     overwrite: bool = False,
     export_zip: bool = True,
 ) -> Path:
     """Reusable pipeline entry point for CLI, Windows GUI, and Android/Kivy GUI."""
-    input_dir = Path(input_dir)
-    output_base = Path(output_dir) if output_dir else Path("output")
+    input_dir = resolve_user_path(input_dir)
+    output_base = resolve_user_path(output_dir) if output_dir else OUTPUT_DIR
 
     cfg = dict(load_config(preset_name))
+    background_template = resolve_resource_path(cfg.get("background_template"))
+    if background_template:
+        cfg["background_template"] = str(background_template)
+    mockup_templates = [
+        str(resolved)
+        for template in cfg.get("mockup_templates", []) or []
+        if (resolved := resolve_resource_path(template)) is not None
+    ]
+    if mockup_templates:
+        cfg["mockup_templates"] = mockup_templates
 
     if background_override:
-        cfg["background_template"] = str(Path(background_override))
+        cfg["background_template"] = str(resolve_user_path(background_override))
     if template_override:
-        cfg["mockup_templates"] = [str(Path(template_override))]
+        cfg["mockup_templates"] = [str(resolve_user_path(template_override))]
     if canvas_size:
         cfg["canvas_size"] = int(canvas_size)
-    if object_scale is not None:
-        cfg["object_scale"] = float(object_scale)
-    if rotation_degrees is not None:
-        cfg["rotation_degrees"] = float(rotation_degrees)
     cfg["export_zip"] = bool(export_zip)
 
     return run_export_pipeline(

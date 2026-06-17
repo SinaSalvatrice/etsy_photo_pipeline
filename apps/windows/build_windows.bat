@@ -6,15 +6,18 @@ if not exist .venv (
   python -m venv .venv
 )
 
-call .venv\Scripts\activate
-python -m pip install --upgrade pip
-pip install -r requirements_windows.txt
-pip install pyinstaller
+set "PYTHON=.venv\Scripts\python.exe"
 
-pyinstaller ^
+"%PYTHON%" -m pip install --upgrade pip
+"%PYTHON%" -m pip install -r requirements_windows.txt
+
+"%PYTHON%" -m PyInstaller ^
   --noconfirm ^
+  --clean ^
   --name "Etsy Photo Pipeline" ^
   --windowed ^
+  --distpath dist ^
+  --workpath build ^
   --add-data "configs;configs" ^
   --add-data "templates;templates" ^
   --add-data "README.md;." ^
