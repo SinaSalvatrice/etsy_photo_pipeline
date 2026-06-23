@@ -1,0 +1,27 @@
+{
+  "template_type": "mockup",
+  "template_image": "templates/clocks/wall_clock_dark_room_01.jpg",
+  "overlay_image": "",
+  "foreground_mask": "",
+  "anchor": {
+    "x": 1500,
+    "y": 1350
+  },
+  "anchor_box": {
+    "x": 750,
+    "y": 600,
+    "width": 1500,
+    "height": 1500
+  },
+  "default_scale": 0.55,
+  "scale_min": 0.45,
+  "scale_max": 0.75,
+  "rotation": 0,
+  "shadow_profile": "soft_wall",
+  "output_crop": {
+    "x": 0,
+    "y": 0,
+    "width": 3000,
+    "height": 3000
+  }
+}

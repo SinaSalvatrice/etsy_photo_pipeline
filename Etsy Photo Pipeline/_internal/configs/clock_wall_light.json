@@ -1,0 +1,23 @@
+{
+  "canvas_size": 3000,
+  "output_quality": 95,
+  "background_template": "templates/clocks/wall_clock_light_hero_01.jpg",
+  "mockup_templates": [
+    "templates/clocks/wall_clock_light_room_01.json"
+  ],
+  "object_scale": 0.76,
+  "position_x": 0.5,
+  "position_y": 0.5,
+  "rotation_degrees": 0,
+  "auto_rotate": false,
+  "shadow_opacity": 0.25,
+  "shadow_blur": 60,
+  "shadow_offset_x": 25,
+  "shadow_offset_y": 45,
+  "contrast": 1.04,
+  "brightness": 1.02,
+  "sharpness": 1.06,
+  "saturation": 1.0,
+  "preserve_object": true,
+  "export_zip": true
+}

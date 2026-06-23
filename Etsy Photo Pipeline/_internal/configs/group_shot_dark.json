@@ -1,0 +1,22 @@
+{
+  "canvas_size": 3000,
+  "output_quality": 95,
+  "background_template": "templates/group/dark_group_01.jpg",
+  "mockup_templates": [],
+  "object_scale": 0.35,
+  "position_x": 0.5,
+  "position_y": 0.54,
+  "rotation_degrees": 0,
+  "auto_rotate": false,
+  "shadow_opacity": 0.4,
+  "shadow_blur": 50,
+  "shadow_offset_x": 25,
+  "shadow_offset_y": 60,
+  "contrast": 1.08,
+  "brightness": 1.0,
+  "sharpness": 1.1,
+  "saturation": 1.0,
+  "preserve_object": true,
+  "export_zip": true,
+  "group_mode": true
+}
