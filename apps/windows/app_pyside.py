@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -25,12 +26,41 @@ from PySide6.QtWidgets import (
 
 
 def find_project_root(start: Path) -> Path:
-    """Find the repository root so src imports work from different launch locations."""
-    current = start.resolve()
-    for folder in (current, *current.parents):
-        if (folder / "src").is_dir() and (folder / "configs").is_dir():
-            return folder
-    raise RuntimeError("Project root not found. Expected folders: src/ and configs/.")
+    """Find the project root so src imports work from different launch locations."""
+    candidates = [start, Path.cwd()]
+
+    env_root = os.environ.get("ETSY_PHOTO_PIPELINE_ROOT")
+    if env_root:
+        candidates.insert(0, Path(env_root))
+
+    if getattr(sys, "frozen", False):
+        candidates.extend(
+            [
+                Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent)),
+                Path(sys.executable).parent,
+            ]
+        )
+
+    checked: list[Path] = []
+    for candidate in candidates:
+        current = candidate.resolve()
+        for folder in (current, *current.parents):
+            if folder in checked:
+                continue
+            checked.append(folder)
+
+            has_configs = (folder / "configs").is_dir()
+            has_src = (folder / "src").is_dir()
+            if has_configs and (has_src or getattr(sys, "frozen", False)):
+                return folder
+
+    searched = "\n".join(f"- {folder}" for folder in checked)
+    raise RuntimeError(
+        "Project root not found.\n"
+        "Start the app from the etsy_photo_pipeline folder or set ETSY_PHOTO_PIPELINE_ROOT.\n"
+        "Expected folders in the project root: src/ and configs/.\n"
+        f"Searched:\n{searched}"
+    )
 
 
 PROJECT_ROOT = find_project_root(Path(__file__).parent)
