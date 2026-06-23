@@ -18,6 +18,8 @@ set "PYTHON=.venv\Scripts\python.exe"
   --windowed ^
   --distpath dist ^
   --workpath build ^
+  --paths "." ^
+  --collect-submodules "src" ^
   --add-data "configs;configs" ^
   --add-data "templates;templates" ^
   --add-data "README.md;." ^
