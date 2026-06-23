@@ -23,7 +23,17 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+def find_project_root(start: Path) -> Path:
+    """Find the repository root so src imports work from different launch locations."""
+    current = start.resolve()
+    for folder in (current, *current.parents):
+        if (folder / "src").is_dir() and (folder / "configs").is_dir():
+            return folder
+    raise RuntimeError("Project root not found. Expected folders: src/ and configs/.")
+
+
+PROJECT_ROOT = find_project_root(Path(__file__).parent)
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
