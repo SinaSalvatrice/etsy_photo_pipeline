@@ -36,7 +36,13 @@ python make_etsy_set.py --input demo/pendant_demo --preset jewelry_dark_pendant 
 pip install -r requirements_windows.txt
 ```
 
-7. Launch the Windows GUI.
+7. Launch the Windows GUI from the project root.
+
+```powershell
+python run_windows_gui.py
+```
+
+Alternative direct launch from the project root:
 
 ```powershell
 python apps/windows/app_pyside.py
@@ -81,10 +87,10 @@ The GUI uses the same shared pipeline as the CLI and supports:
 Run it from the project root:
 
 ```powershell
-python apps/windows/app_pyside.py
+python run_windows_gui.py
 ```
 
-The GUI can also be launched from another working directory because presets, templates, and source imports are resolved from the project itself rather than the shell cwd.
+The root launcher keeps the repository root on `sys.path`, so the shared `src` package is importable even if the current shell location is not ideal.
 
 ## Debug output
 
@@ -125,6 +131,7 @@ The script:
 ```text
 src/pipeline.py                shared reusable pipeline entry point
 make_etsy_set.py               CLI wrapper
+run_windows_gui.py             Windows GUI root launcher
 apps/windows/app_pyside.py     Windows desktop GUI
 apps/windows/build_windows.bat Windows EXE build script
 apps/android_kivy/main.py      Android/Kivy skeleton
