@@ -24,7 +24,7 @@ RootWidget:
     spacing: "8dp"
 
     Label:
-        text: "Etsy Photo Pipeline — Android/Pydroid style mode"
+        text: "Etsy Photo Pipeline - Android/Pydroid style mode"
         size_hint_y: None
         height: "36dp"
 
